@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Breakdowns</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        nav {
+            background-color: #e31b23;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+            display: inline-block;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .content {
+            padding: 20px;
+        }
+        .score-card {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #333;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: #fff;
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #e31b23;
+        }
+        .matrix {
+            background-color: #000;
+            border: 1px solid #444;
+            padding: 10px;
+            margin-top: 10px;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+        button {
+            background-color: #e31b23;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #c2181d;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            color: #000;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="Home.html">Home</a>
+        <a href="Active_Breakdowns.html">Active Breakdowns</a>
+        <a href="Equipment_List.html">Equipment List</a>
+    </nav>
+
+    <div class="content">
+        <h1>Active Breakdowns</h1>
+        <div class="score-card" id="activeBreakdowns">
+            <!-- Active breakdowns will be dynamically added here -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const activeBreakdownsContainer = document.getElementById('activeBreakdowns');
+            const activeBreakdowns = JSON.parse(localStorage.getItem('activeBreakdowns')) || [];
+
+            activeBreakdowns.forEach((breakdown, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+
+                const uploadedImages = breakdown.images || [];
+                const imageHtml = uploadedImages.map((src, imgIndex) => `
+                    <a href="${src}" target="_blank">
+                        <img src="${src}" alt="Image ${imgIndex + 1} for Unit ${breakdown.unit}" />
+                    </a>
+                `).join('');
+
+                card.innerHTML = `
+                    <h2>Unit: ${breakdown.unit} | Market: ${breakdown.market}</h2>
+                    <div class="matrix">
+                        <strong>Date:</strong> ${breakdown.date}<br>
+                        <strong>Division:</strong> ${breakdown.division}<br>
+                        <strong>Driver:</strong> ${breakdown.driver}<br>
+                        <strong>Issue:</strong> ${breakdown.issue}<br>
+                        <strong>Location:</strong> ${breakdown.breakdownLocation}<br>
+                        <strong>Service Type:</strong> ${breakdown.serviceType}<br>
+                        <strong>Vendor:</strong> ${breakdown.vendor}<br>
+                        <strong>Status:</strong> ${breakdown.serviceStatus}<br>
+                        <strong>ETA:</strong> ${breakdown.eta || 'N/A'} hours<br>
+                        <strong>Communication Log:</strong> <div id="communicationLog-${index}">${breakdown.communicationLog || 'No logs yet'}</div>
+                        ${uploadedImages.length > 0 ? `<strong>Uploaded Images:</strong><br>${imageHtml}` : '<strong>No images uploaded.</strong>'}
+                    </div>
+                    <textarea id="logInput-${index}" placeholder="Add to communication log..."></textarea>
+                    <button onclick="addToLog(${index})">Add to Log</button>
+                    <button onclick="markAsCompleted(${index})">Mark as Completed</button>
+                `;
+
+                activeBreakdownsContainer.appendChild(card);
+            });
+        });
+
+        function addToLog(index) {
+            const logInput = document.getElementById(`logInput-${index}`);
+            const logContainer = document.getElementById(`communicationLog-${index}`);
+            const activeBreakdowns = JSON.parse(localStorage.getItem('activeBreakdowns')) || [];
+
+            if (logInput.value.trim() !== '') {
+                const log = logInput.value.trim();
+                activeBreakdowns[index].communicationLog = activeBreakdowns[index].communicationLog ? activeBreakdowns[index].communicationLog + `<br>${log}` : log;
+                localStorage.setItem('activeBreakdowns', JSON.stringify(activeBreakdowns));
+                logContainer.innerHTML = activeBreakdowns[index].communicationLog;
+                logInput.value = '';
+            } else {
+                alert('Please enter a log before adding.');
+            }
+        }
+
+        function markAsCompleted(index) {
+            const activeBreakdowns = JSON.parse(localStorage.getItem('activeBreakdowns')) || [];
+            const completedBreakdown = activeBreakdowns.splice(index, 1)[0];
+
+            const completedBreakdowns = JSON.parse(localStorage.getItem('completedBreakdowns')) || [];
+            completedBreakdowns.push(completedBreakdown);
+
+            localStorage.setItem('activeBreakdowns', JSON.stringify(activeBreakdowns));
+            localStorage.setItem('completedBreakdowns', JSON.stringify(completedBreakdowns));
+
+            location.reload();
+        }
+    </script>
+</body>
+</html>

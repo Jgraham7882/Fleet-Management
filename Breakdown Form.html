@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breakdown Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        nav {
+            background-color: #e31b23;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+            display: inline-block;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .content {
+            padding: 20px;
+        }
+        .form-container {
+            background-color: #333;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .form-container h2 {
+            color: #e31b23;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #e31b23;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #c2181d;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="Home.html">Home</a>
+        <a href="Active_Breakdowns.html">Active Breakdowns</a>
+        <a href="Equipment_List.html">Equipment List</a>
+    </nav>
+
+    <div class="content">
+        <div class="form-container">
+            <h2>Breakdown Form</h2>
+            <form id="breakdownForm" onsubmit="submitForm(event)">
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+
+                <label for="division">Division:</label>
+                <select id="division" name="division" required>
+                    <option value="" disabled selected>Select Division</option>
+                    <option value="PVST">PVST</option>
+                    <option value="Minibulk">Minibulk</option>
+                </select>
+
+                <label for="market">Market:</label>
+                <input type="text" id="market" name="market" required>
+
+                <label for="driver">Driver:</label>
+                <input type="text" id="driver" name="driver" required>
+
+                <label for="unit">Unit:</label>
+                <input type="text" id="unit" name="unit" required>
+
+                <label for="issue">Issue:</label>
+                <textarea id="issue" name="issue" rows="4" required></textarea>
+
+                <label for="breakdownLocation">Breakdown Location:</label>
+                <input type="text" id="breakdownLocation" name="breakdownLocation" required>
+
+                <label for="serviceType">Type of Service:</label>
+                <select id="serviceType" name="serviceType" required>
+                    <option value="" disabled selected>Select Service Type</option>
+                    <option value="Road Service">Road Service</option>
+                    <option value="Shop Service">Shop Service</option>
+                </select>
+
+                <label for="vendor">Vendor:</label>
+                <input type="text" id="vendor" name="vendor" required>
+
+                <label for="serviceStatus">Service Status:</label>
+                <select id="serviceStatus" name="serviceStatus" required>
+                    <option value="" disabled selected>Select Status</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+
+                <label for="eta">ETA (Hours):</label>
+                <input type="number" id="eta" name="eta" min="0" step="1">
+
+                <label for="uploadImages">Upload Images:</label>
+                <input type="file" id="uploadImages" name="uploadImages" accept="image/*" multiple>
+
+                <label for="communicationLog">Communication Log:</label>
+                <textarea id="communicationLog" name="communicationLog" rows="4"></textarea>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateField = document.getElementById('date');
+            const today = new Date().toISOString().split('T')[0];
+            dateField.value = today;
+        });
+
+        function submitForm(event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const breakdownData = Object.fromEntries(formData.entries());
+
+            const activeBreakdowns = JSON.parse(localStorage.getItem('activeBreakdowns')) || [];
+            activeBreakdowns.push(breakdownData);
+            localStorage.setItem('activeBreakdowns', JSON.stringify(activeBreakdowns));
+
+            alert('Breakdown successfully submitted!');
+            event.target.reset();
+        }
+    </script>
+</body>
+</html>
+
+

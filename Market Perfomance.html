@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Performance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        nav {
+            background-color: #e31b23;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+            display: inline-block;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .content {
+            padding: 20px;
+        }
+        .score-card {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background-color: #333;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: #fff;
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #e31b23;
+        }
+        .matrix {
+            background-color: #000;
+            border: 1px solid #444;
+            padding: 10px;
+            margin-top: 10px;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #e31b23;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="active_breakdowns.html">Active Breakdowns</a>
+        <a href="equipment_list.html">Equipment List</a>
+        <a href="market_performance.html">Market Performance</a>
+    </nav>
+
+    <div class="content">
+        <h1>Market Performance</h1>
+        <div class="score-card">
+            <div class="card">
+                <h2>Breakdowns by Market</h2>
+                <div class="matrix" id="marketMatrix">
+                    <!-- Market breakdowns matrix will populate here -->
+                </div>
+            </div>
+            <div class="card">
+                <h2>Equipment Prone to Breakdowns</h2>
+                <div class="matrix" id="equipmentMatrix">
+                    <!-- Equipment prone to breakdowns will populate here -->
+                </div>
+            </div>
+            <div class="card">
+                <h2>Drivers with High Number of Breakdowns</h2>
+                <div class="matrix" id="driverMatrix">
+                    <!-- Driver breakdown data will populate here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const completedBreakdowns = JSON.parse(localStorage.getItem('completedBreakdowns')) || [];
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+
+            const marketMatrix = document.getElementById('marketMatrix');
+            const equipmentMatrix = document.getElementById('equipmentMatrix');
+            const driverMatrix = document.getElementById('driverMatrix');
+
+            // Calculate breakdowns by market
+            const breakdownsByMarket = completedBreakdowns.reduce((acc, breakdown) => {
+                const breakdownDate = new Date(breakdown.date);
+                const isCurrentMonth = breakdownDate.getMonth() === currentMonth && breakdownDate.getFullYear() === currentYear;
+
+                acc[breakdown.market] = acc[breakdown.market] || { currentMonth: 0, ytd: 0 };
+
+                if (isCurrentMonth) acc[breakdown.market].currentMonth++;
+                acc[breakdown.market].ytd++;
+
+                return acc;
+            }, {});
+
+            Object.keys(breakdownsByMarket).forEach(market => {
+                const { currentMonth, ytd } = breakdownsByMarket[market];
+                const line = `${market}: Current Month = ${currentMonth}, YTD = ${ytd}`;
+                marketMatrix.innerHTML += `${line}<br>`;
+            });
+
+            // Calculate breakdowns by unit
+            const breakdownsByUnit = completedBreakdowns.reduce((acc, breakdown) => {
+                acc[breakdown.unit] = acc[breakdown.unit] || 0;
+                acc[breakdown.unit]++;
+                return acc;
+            }, {});
+
+            Object.keys(breakdownsByUnit).sort((a, b) => breakdownsByUnit[b] - breakdownsByUnit[a]).forEach(unit => {
+                const totalBreakdowns = breakdownsByUnit[unit];
+                const line = `Unit ${unit}: ${totalBreakdowns} breakdowns`;
+                equipmentMatrix.innerHTML += `${line}<br>`;
+            });
+
+            // Calculate breakdowns by driver
+            const breakdownsByDriver = completedBreakdowns.reduce((acc, breakdown) => {
+                acc[breakdown.driver] = acc[breakdown.driver] || 0;
+                acc[breakdown.driver]++;
+                return acc;
+            }, {});
+
+            Object.keys(breakdownsByDriver).sort((a, b) => breakdownsByDriver[b] - breakdownsByDriver[a]).forEach(driver => {
+                const totalBreakdowns = breakdownsByDriver[driver];
+                const line = `Driver ${driver}: ${totalBreakdowns} breakdowns`;
+                driverMatrix.innerHTML += `${line}<br>`;
+            });
+        });
+    </script>
+</body>
+</html>
+
+
